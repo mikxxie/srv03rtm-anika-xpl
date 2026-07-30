@@ -27,11 +27,11 @@ jobs:
           mkdir -Force $env:GITHUB_WORKSPACE\binaries.x86fre
           Copy-Item -Path "D:\extracted\*" -Destination "$env:GITHUB_WORKSPACE\binaries.x86fre\" -Recurse -Force
 
-      - name: Find and track files over 100MB with Git LFS
+      - name: Find and track files over 50MB with Git LFS
         run: |
           cd $env:GITHUB_WORKSPACE
           git lfs install
-          $largeFiles = Get-ChildItem -Path binaries.x86fre -Recurse -File | Where-Object { $_.Length -gt 100MB }
+          $largeFiles = Get-ChildItem -Path binaries.x86fre -Recurse -File | Where-Object { $_.Length -gt 50MB }
           if ($largeFiles) {
             foreach ($file in $largeFiles) {
               $relativePath = $file.FullName.Substring($env:GITHUB_WORKSPACE.Length + 1)
@@ -39,7 +39,7 @@ jobs:
               Write-Host "Tracking with LFS: $relativePath ($([math]::Round($file.Length / 1MB, 2)) MB)"
             }
           } else {
-            Write-Host "No files over 100MB found."
+            Write-Host "No files over 50MB found."
           }
           git add .gitattributes
 
