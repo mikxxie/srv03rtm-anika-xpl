@@ -1,0 +1,54 @@
+name: Apply New Certificates
+
+on:
+  workflow_dispatch:
+
+jobs:
+  apply-certs:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GAH }}
+
+      - name: Extract certificate ZIP
+        run: |
+          7z x srv03rtm_certs.zip -oD:\certs -y
+          Write-Host "ZIP extracted successfully!"
+          dir D:\certs
+
+      - name: Copy certificates to tools folder
+        run: |
+          Copy-Item -Path "D:\certs\srv03rtm.certs\tools\*" -Destination "$env:GITHUB_WORKSPACE\tools\" -Force
+          Write-Host "Certificates copied to tools/"
+
+      - name: Copy patched source files
+        run: |
+          $folders = @("base", "ds", "shell", "windows", "mergedcomponents")
+          foreach ($folder in $folders) {
+            $source = "D:\certs\srv03rtm.certs\$folder"
+            $dest = "$env:GITHUB_WORKSPACE\$folder"
+            if (Test-Path $source) {
+              Copy-Item -Path "$source\*" -Destination "$dest\" -Recurse -Force
+              Write-Host "Copied $folder patched files"
+            }
+          }
+
+      - name: Clean up
+        run: |
+          Remove-Item srv03rtm_certs.zip -Force
+          Remove-Item D:\certs -Recurse -Force
+          Write-Host "Cleanup complete!"
+
+      - name: Commit and push changes
+        run: |
+          cd $env:GITHUB_WORKSPACE
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tools/ base/ ds/ shell/ windows/ mergedcomponents/
+          git commit -m "Apply new certificates and patched source files [skip ci]" || echo "No changes to commit"
+          git push
