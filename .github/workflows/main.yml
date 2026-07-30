@@ -48,12 +48,26 @@ jobs:
           certutil -importPFX -p "" driver.pfx
           cd D:\srv03rtm
 
+      - name: Fix SignTool certificate error
+        run: |
+         cd D:\srv03rtm\tools
+         # Remove old certs first
+         certutil -delstore Root testroot.cer
+         certutil -delstore Root testpca.cer
+         certutil -delstore Root vbl03ca.cer
+         # Reinstall with proper flags
+         certutil -addstore -f Root testroot.cer
+         certutil -addstore -f Root testpca.cer
+         certutil -addstore -f Root vbl03ca.cer
+         certutil -importPFX -p "" driver.pfx
+
       - name: Prebuild
         run: |
           D:\srv03rtm\tools\prebuild.cmd
 
       - name: Initialize Build Environment
         run: |
+          taskkill /F /IM notepad.exe 2>nul || echo "No notepad to kill"
           D:\srv03rtm\tools\razzle64.cmd free offline
 
       - name: Clean Build (first time or major changes)
