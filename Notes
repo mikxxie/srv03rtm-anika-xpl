@@ -1,2 +1,2 @@
 _ Windows titlebar and other colours are defined in 
-windows/core/ntuser/kernel/globals.c
+windows/core/ntuser/kernel/globals.c (L946)
