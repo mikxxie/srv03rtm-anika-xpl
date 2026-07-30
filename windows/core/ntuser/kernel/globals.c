@@ -946,8 +946,8 @@ SECURITY_QUALITY_OF_SERVICE gqosDefault = {
 CONST COLORREF gargbInitial[COLOR_MAX] = {
     RGB(192, 192, 192),   // COLOR_SCROLLBAR
     RGB( 58, 110, 165),   // COLOR_BACKGROUND
-    RGB(000, 000, 128),   // COLOR_ACTIVECAPTION
-    RGB(128, 128, 128),   // COLOR_INACTIVECAPTION
+    RGB(000, 000, 128),   // COLOR_ACTIVECAPTION /* gradient titlebar start colour */
+    RGB(128, 128, 128),   // COLOR_INACTIVECAPTION /* gradient titlebar start colour */
     RGB(192, 192, 192),   // COLOR_MENU
     RGB(255, 255, 255),   // COLOR_WINDOW
     RGB(000, 000, 000),   // COLOR_WINDOWFRAME
@@ -971,8 +971,8 @@ CONST COLORREF gargbInitial[COLOR_MAX] = {
     RGB(255, 255, 225),   // COLOR_INFOBK
     RGB(180, 180, 180),   // COLOR_3DALTFACE /* unused */
     RGB(  0,   0, 255),   // COLOR_HOTLIGHT
-    RGB( 16, 132, 208),   // COLOR_GRADIENTACTIVECAPTION
-    RGB(181, 181, 181),   // COLOR_GRADIENTINACTIVECAPTION
+    RGB( 16, 132, 208),   // COLOR_GRADIENTACTIVECAPTION /* gradient titlebar end colour */
+    RGB(181, 181, 181),   // COLOR_GRADIENTINACTIVECAPTION /* gradient titlebar end colour */
     RGB(210, 210, 255),   // COLOR_MENUHILIGHT
     RGB(212, 208, 200)    // COLOR_MENUBAR
 };
