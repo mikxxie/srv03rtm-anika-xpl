@@ -16,36 +16,43 @@ jobs:
 
       - name: Download misbin.7z from OpenXP
         run: |
-          Write-Host "Downloading misbin.7z..."
           Invoke-WebRequest -Uri "https://theopenxp.org/download/files/2" -OutFile "misbin.7z"
-          Write-Host "Download complete!"
 
       - name: Extract misbin.7z
         run: |
-          Write-Host "Extracting misbin.7z..."
           7z x misbin.7z -oD:\extracted -y
-          Write-Host "Extraction complete!"
 
       - name: Copy files to repository
         run: |
-          Write-Host "Copying extracted files to repository..."
-          #create the binaries folder in the repo
           mkdir -Force $env:GITHUB_WORKSPACE\binaries.x86fre
-          #copy everything from extracted folder to repo
           Copy-Item -Path "D:\extracted\*" -Destination "$env:GITHUB_WORKSPACE\binaries.x86fre\" -Recurse -Force
-          Write-Host "Copy complete!"
+
+      - name: Find and track files over 100MB with Git LFS
+        run: |
+          cd $env:GITHUB_WORKSPACE
+          git lfs install
+          $largeFiles = Get-ChildItem -Path binaries.x86fre -Recurse -File | Where-Object { $_.Length -gt 100MB }
+          if ($largeFiles) {
+            foreach ($file in $largeFiles) {
+              $relativePath = $file.FullName.Substring($env:GITHUB_WORKSPACE.Length + 1)
+              git lfs track $relativePath
+              Write-Host "Tracking with LFS: $relativePath ($([math]::Round($file.Length / 1MB, 2)) MB)"
+            }
+          } else {
+            Write-Host "No files over 100MB found."
+          }
+          git add .gitattributes
 
       - name: Clean up
         run: |
           Remove-Item misbin.7z -Force
           Remove-Item D:\extracted -Recurse -Force
-          Write-Host "Cleanup complete!"
 
-      - name: Commit and push changes
+      - name: Commit and push
         run: |
           cd $env:GITHUB_WORKSPACE
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add binaries.x86fre/
-          git commit -m "Add missing binaries from misbin.7z [skip ci]"
+          git commit -m "Add missing binaries from misbin.7z [skip ci]" || echo "No changes"
           git push
