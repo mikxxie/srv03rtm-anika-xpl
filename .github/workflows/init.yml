@@ -38,10 +38,10 @@ jobs:
               git lfs track $relativePath
               Write-Host "Tracking with LFS: $relativePath ($([math]::Round($file.Length / 1MB, 2)) MB)"
             }
+            git add .gitattributes
           } else {
-            Write-Host "No files over 50MB found."
+            Write-Host "No files over 50MB found. Skipping .gitattributes."
           }
-          git add .gitattributes
 
       - name: Clean up
         run: |
