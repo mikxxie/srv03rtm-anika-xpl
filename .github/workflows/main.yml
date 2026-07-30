@@ -48,34 +48,6 @@ jobs:
           certutil -importPFX -p "" driver.pfx
           cd D:\srv03rtm
 
-      - name: Fix SignTool certificate error
-        run: |
-         cd D:\srv03rtm\tools
-         # Remove old certs first
-         certutil -delstore Root testroot.cer
-         certutil -delstore Root testpca.cer
-         certutil -delstore Root vbl03ca.cer
-         # Reinstall with proper flags
-         certutil -addstore -f Root testroot.cer
-         certutil -addstore -f Root testpca.cer
-         certutil -addstore -f Root vbl03ca.cer
-         certutil -importPFX -p "" driver.pfx
-
-      - name: Generate new test certificates
-        run: |
-         cd D:\srv03rtm\tools
-         git clone https://codeberg.org/openxp/certutil certgen
-         cd certgen
-         chmod 777 * -R
-         dos2unix generate.sh
-         ./generate.sh
-         cp -r srv03rtm.certs/* ..
-         cd ..
-         rm -rf certgen
-         certutil -addstore -f Root testroot.cer
-         certutil -addstore -f Root testpca.cer
-         certutil -addstore -f Root vbl03ca.cer
-         certutil -importPFX -p "" driver.pfx
 
       - name: Prebuild
         run: |
