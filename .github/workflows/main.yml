@@ -31,7 +31,8 @@ jobs:
         if: steps.cache-build.outputs.cache-hit != 'true'
         run: |
           if (Test-Path D:\srv03rtm) { Remove-Item D:\srv03rtm -Recurse -Force }
-          Move-Item $env:GITHUB_WORKSPACE D:\srv03rtm
+          New-Item -ItemType Directory -Path D:\srv03rtm -Force
+          Copy-Item -Path "$env:GITHUB_WORKSPACE\*" -Destination "D:\srv03rtm\" -Recurse -Force
           attrib -r D:\srv03rtm /s /d
 
       - name: Disable Antivirus
