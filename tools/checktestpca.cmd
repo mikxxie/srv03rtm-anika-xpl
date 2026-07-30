@@ -3,7 +3,7 @@
 
 echo Verifying that the Test PCA Certificate is installed...
 set __certinstalled=
-for /f %%i in ('tfindcer -a"Microsoft Test PCA" -s ca -S ^| findstr /c:"52871BBC 6CAAEF1F EB45D478 DDC7517C 06D7A08D"') do (
+for /f %%i in ('tfindcer -a"Microsoft Test PCA" -s ca -S ^| findstr /c:"E30302D5 39119EF7 A4ADBF8D 8920CC27 1F4A5A3F"') do (
     set __certinstalled=1
 )
 
@@ -15,7 +15,7 @@ certmgr -add %RazzleToolPath%\testpca.cer -r localMachine -s ca
 
 echo Check again to see if Test PCA Certificate is installed...
 set __certinstalled=
-for /f %%i in ('tfindcer -a"Microsoft Test PCA" -s ca -S ^| findstr /c:"52871BBC 6CAAEF1F EB45D478 DDC7517C 06D7A08D"') do (
+for /f %%i in ('tfindcer -a"Microsoft Test PCA" -s ca -S ^| findstr /c:"E30302D5 39119EF7 A4ADBF8D 8920CC27 1F4A5A3F"') do (
     set __certinstalled=1
 )
 

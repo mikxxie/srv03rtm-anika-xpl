@@ -2787,11 +2787,11 @@ NTSTATUS Win32UserInitialize(
 
     /*
      * Determine if we have unsigned drivers installed
-     * Use      A4CAECFC40A44BB73E3BBF69477BC68D07B0C7AB as current key to check.
+     * Use      65BC7935C90129FAA839B80069F5B060F405EBE8 as current key to check.
      */
-    if (NT_SUCCESS(RtlCheckRegistryKey(RTL_REGISTRY_ABSOLUTE, L"\\Registry\\Machine\\SOFTWARE\\Policies\\Microsoft\\SystemCertificates\\Root\\Certificates\\A4CAECFC40A44BB73E3BBF69477BC68D07B0C7AB")) ||
-        NT_SUCCESS(RtlCheckRegistryKey(RTL_REGISTRY_ABSOLUTE, L"\\Registry\\Machine\\SOFTWARE\\Microsoft\\SystemCertificates\\Root\\Certificates\\A4CAECFC40A44BB73E3BBF69477BC68D07B0C7AB")) ||
-        NT_SUCCESS(RtlCheckRegistryKey(RTL_REGISTRY_USER, L"\\SOFTWARE\\Microsoft\\SystemCertificates\\Root\\Certificates\\A4CAECFC40A44BB73E3BBF69477BC68D07B0C7AB"))) {
+    if (NT_SUCCESS(RtlCheckRegistryKey(RTL_REGISTRY_ABSOLUTE, L"\\Registry\\Machine\\SOFTWARE\\Policies\\Microsoft\\SystemCertificates\\Root\\Certificates\\65BC7935C90129FAA839B80069F5B060F405EBE8")) ||
+        NT_SUCCESS(RtlCheckRegistryKey(RTL_REGISTRY_ABSOLUTE, L"\\Registry\\Machine\\SOFTWARE\\Microsoft\\SystemCertificates\\Root\\Certificates\\65BC7935C90129FAA839B80069F5B060F405EBE8")) ||
+        NT_SUCCESS(RtlCheckRegistryKey(RTL_REGISTRY_USER, L"\\SOFTWARE\\Microsoft\\SystemCertificates\\Root\\Certificates\\65BC7935C90129FAA839B80069F5B060F405EBE8"))) {
         gfUnsignedDrivers = TRUE;
     }
 
