@@ -1,51 +1,82 @@
-name: Prepare Missing Binaries
+name: Build Windows Server 2003
 
 on:
   workflow_dispatch:
 
 jobs:
-  prepare:
+  build:
     runs-on: windows-latest
-    timeout-minutes: 120
+    timeout-minutes: 720
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GAT }}
 
-      - name: Download misbin.7z from OpenXP
-        run: |
-          Write-Host "Downloading misbin.7z from OpenXP..."
-          Invoke-WebRequest -Uri "https://theopenxp.org/download/files/2" -OutFile "misbin.7z"
-          Write-Host "Download complete!"
+      - name: Restore build cache
+        uses: actions/cache@v4
+        id: cache-build
+        with:
+          path: |
+            D:\srv03rtm\obj
+            D:\srv03rtm\binaries.x86fre
+            D:\srv03rtm\lib
+          key: ${{ runner.os }}-build-${{ hashFiles('D:\srv03rtm\base\**', 'D:\srv03rtm\windows\**', 'D:\srv03rtm\shell\**') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
 
-      - name: Extract misbin.7z
+      - name: Set up source directory
+        if: steps.cache-build.outputs.cache-hit != 'true'
         run: |
-          Write-Host "Extracting misbin.7z..."
-          7z x misbin.7z -oD:\extracted -y
-          Write-Host "Extraction complete!"
+          if (Test-Path D:\srv03rtm) { Remove-Item D:\srv03rtm -Recurse -Force }
+          Move-Item $env:GITHUB_WORKSPACE D:\srv03rtm
+          attrib -r D:\srv03rtm /s /d
 
-      - name: Copy files to repository
+      - name: Disable Antivirus
         run: |
-          Write-Host "Copying extracted files to repository..."
-          # Create the binaries folder in the repo
-          mkdir -Force $env:GITHUB_WORKSPACE\binaries.x86fre
-          # Copy everything from extracted folder to repo
-          Copy-Item -Path "D:\extracted\*" -Destination "$env:GITHUB_WORKSPACE\binaries.x86fre\" -Recurse -Force
-          Write-Host "Copy complete!"
+          Set-MpPreference -DisableRealtimeMonitoring $true
 
-      - name: Clean up
+      - name: Install Certificates
         run: |
-          Remove-Item misbin.7z -Force
-          Remove-Item D:\extracted -Recurse -Force
-          Write-Host "Cleanup complete!"
+          cd D:\srv03rtm\tools
+          certutil -addstore Root testroot.cer
+          certutil -addstore Root testpca.cer
+          certutil -addstore Root vbl03ca.cer
+          certutil -importPFX -p "" driver.pfx
+          cd D:\srv03rtm
 
-      - name: Commit and push changes
+      - name: Prebuild
         run: |
-          cd $env:GITHUB_WORKSPACE
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add binaries.x86fre/
-          git commit -m "Add missing binaries from misbin.7z [skip ci]"
-          git push
+          D:\srv03rtm\tools\prebuild.cmd
+
+      - name: Initialize Build Environment
+        run: |
+          D:\srv03rtm\tools\razzle64.cmd free offline
+
+      - name: Clean Build (first time or major changes)
+        if: steps.cache-build.outputs.cache-hit != 'true'
+        run: |
+          D:\srv03rtm\tools\razzle64.cmd free offline "bcz -M 4"
+
+      - name: Dirty Build (incremental, for small changes)
+        if: steps.cache-build.outputs.cache-hit == 'true'
+        run: |
+          D:\srv03rtm\tools\razzle64.cmd free offline "bz -M 4"
+
+      - name: Post-Build Processing
+        run: |
+          D:\srv03rtm\tools\razzle64.cmd free offline "D:\srv03rtm\tools\postbuild.cmd -full"
+          D:\srv03rtm\tools\razzle64.cmd free offline "D:\srv03rtm\tools\postbuild.cmd -sku:srv"
+
+      - name: Create ISO
+        run: |
+          D:\srv03rtm\tools\razzle64.cmd free offline "D:\srv03rtm\tools\oscdimg.cmd srv"
+
+      - name: Upload ISO Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Server-2003-Build
+          path: D:\*.iso
+          retention-days: 30
