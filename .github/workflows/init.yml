@@ -13,6 +13,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GAT }}
 
       - name: Download misbin.7z from OpenXP
         run: |
@@ -53,6 +54,7 @@ jobs:
           cd $env:GITHUB_WORKSPACE
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GAT }}@github.com/${{ github.repository }}
           git add binaries.x86fre/
           git commit -m "Add missing binaries from misbin.7z [skip ci]" || echo "No changes"
           git push
